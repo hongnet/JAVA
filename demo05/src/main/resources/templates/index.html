@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title></title>
+	<title>极简播放器嵌入展示</title>
+	<link rel="stylesheet" href="//apps.bdimg.com/libs/jqueryui/1.10.4/css/jquery-ui.min.css">
+	<script src="//apps.bdimg.com/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script src="//apps.bdimg.com/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+	<link rel="stylesheet" href="https://www.runoob.com/try/demo_source/jqueryui/style.css">
+	<script src='./js/SimplePlayer.js' type="module"></script>
+</head>
+<style type="text/css">
+	.Box {
+		display: inline-block;
+		width: 1rem;
+		height: 1rem;
+		border: 1px solid black;
+		background: #F7F5F5;
+	}
+	.playerTable td{
+		background-color:#ffffff;
+		height:200px;
+		line-height:150%;
+	}
+</style>
+<body>
+<div id="tabs">
+	<ul>
+		<li><a href="#tabs-1">移动及遮挡效果</a></li>
+		<li><a href="#tabs-2">多开测试</a></li>
+	</ul>
+	<div id="tabs-1">
+		<p>
+			<label>预览: </label>
+			<label>indexcode: <input id="txtIndexcode" type="text" size=35 value="8fbb1f064c0c4527a6323fc0835610c4" /></label>
+			<label>url: <input id="txtUrl" type="text" value="" /></label>
+
+			<br /><br />
+			<label>回放: </label>
+			<label>indexcode: <input id="txtIndexcodeBack" type="text" size=35 value="9d91002103fb4db1b31cecdeb4f9d420" /></label>
+			<label>StartTime: <input id="txtStartTime" type="text" size=30 value="2020-03-11T00:00:00.000+08:00" /></label>
+			<label>EndTime: <input id="txtEndTime" type="text" size=30 value="2020-03-11T22:37:31.089+08:00" /></label>
+			<label>vnscResponse: <input id="txtRes" type="text" value="" /></label>
+
+		<hr />
+		<button style="margin:6px;" onclick="commonCfg();">发送通用设置</button>
+		<label>protocol: <input id="txtProtocol" size=4 type="text" value="https" /></label>
+		<label>IP: <input id="txtPlatIp" size=12 type="text" value="10.19.132.252" /></label>
+		<label>Port: <input id="txtPlatPort" size=3 type="text" value="443" /></label>
+		<label>token: <input id="txtPlatToken" type="text" size=100 value="" /></label>
+		<br />
+		<hr />
+		<br /><br />
+		<button style="margin:6px;" onclick="createPlayer('dragCanvasA', 1);">创建播放器</button>
+		<button style="margin:6px;" onclick="destroyPlayer('dragCanvasA');">销毁播放器</button>
+
+		<br />
+		<button style="margin:6px;" onclick="startPlayReal('dragCanvasA');">开始预览</button>
+		<button style="margin:6px;" onclick="stopPlayReal('dragCanvasA');">停止预览</button>
+		<button style="margin:6px;" onclick="PTZControl('dragCanvasA',true);">打开云台控制</button>
+		<button style="margin:6px;" onclick="PTZControl('dragCanvasA',false);">停止云台控制</button>
+
+		<br />
+		<button style="margin:6px;" onclick="startPlayBack('dragCanvasA');">开始回放</button>
+		<button style="margin:6px;" onclick="stopPlayBack('dragCanvasA');">停止回放</button>
+		<button style="margin:6px;" onclick="pause('dragCanvasA',true);">暂停</button>
+		<button style="margin:6px;" onclick="frameNext('dragCanvasA');">单帧进</button>
+		<button style="margin:6px;" onclick="framePre('dragCanvasA');">单帧退</button>
+		<button style="margin:6px;" onclick="pause('dragCanvasA',false);">从暂停、单帧等状态恢复到播放</button>
+		<button style="margin:6px;" onclick="timeSelect('dragCanvasA',true);">进入录像片段选择模式</button>
+		<button style="margin:6px;" onclick="timeSelect('dragCanvasA',false);">退出录像片段选择模式</button>
+		<button style="margin:6px;" onclick="downloadSelect('dragCanvasA');">下载选中录像片段</button>
+
+		<br />
+		<label>共用功能: </label>
+
+		<button style="margin:6px;" onclick="showErrorInfo('dragCanvasA');">展示错误信息</button>
+		<button style="margin:6px;" onclick="doClear('dragCanvasA');">去除错误信息,重置窗口状态</button>
+		<button style="margin:6px;" onclick="snapShot('dragCanvasA');">截图</button>
+		<button style="margin:6px;" onclick="sound('dragCanvasA',true);">打开声音</button>
+		<button style="margin:6px;" onclick="sound('dragCanvasA',false);">关闭声音</button>
+		<button style="margin:6px;" onclick="digitalZoom('dragCanvasA',true);">开始电子放大</button>
+		<button style="margin:6px;" onclick="digitalZoom('dragCanvasA',false);">结束电子放大</button>
+		<br />
+		<hr />
+		</p>
+		<p>
+		<div id="draggableA" class="Box" style="display:flex; flex-flow:row nowrap; justify-content:center; align-items:center; font-size: 0.16rem; width:640px; height:480px">
+			<canvas id="dragCanvasA" width="580px" height="380"></canvas>
+		</div>
+		<div id="draggableB" class="Box" style="font-size: 0.16rem; width:320px; height:240px; text-align: center; vertical-align:middle">
+			<span style="font-size: 1.25px;">我是遮罩</span>
+		</div>
+		</p>
+	</div>
+	<div id="tabs-2">
+		<table width="100%" border="0">
+			<tr>
+				<td class="title" height="60" align="center">极简播放器多开测试</td>
+			</tr>
+			<tr>
+				<td height="25" align="right">HMing</td>
+			</tr>
+		</table>
+		<table class="playerTable" width="100%" border="0" cellspacing="1" cellpadding="4" align="center" bgcolor="#cccccc">
+			<tr>
+				<td class="functionMenu" rowspan="4" width="15%">
+					<button onclick="createAllTab2Player();" >创建所有播放器</button><br>
+					<button onclick="destroyAllTab2Player();" >销毁所有播放器</button><br>
+					<button onclick="play('canvas11');">播放一路</button><br>
+					<button onclick="play4Tab2Player();">播放四路</button><br>
+					<button onclick="play8Tab2Player();">播放八路</button><br>
+					<button onclick="playAllTab2Player();">播放十六路</button><br>
+					<button onclick="stopPlayAllTab2Player();">停止所有播放</button><br>
+				</td>
+				<td align="center" > <canvas id="canvas11"></canvas> </td>
+				<td align="center" > <canvas id="canvas12"></canvas> </td>
+				<td align="center" > <canvas id="canvas13"></canvas> </td>
+				<td align="center" > <canvas id="canvas14"></canvas> </td>
+			</tr>
+			<tr>
+				<td align="center" > <canvas id="canvas21"></canvas> </td>
+				<td align="center" > <canvas id="canvas22"></canvas> </td>
+				<td align="center" > <canvas id="canvas23"></canvas> </td>
+				<td align="center" > <canvas id="canvas24"></canvas> </td>
+			</tr>
+			<tr>
+				<td align="center" > <canvas id="canvas31"></canvas> </td>
+				<td align="center" > <canvas id="canvas32"></canvas> </td>
+				<td align="center" > <canvas id="canvas33"></canvas> </td>
+				<td align="center" > <canvas id="canvas34"></canvas> </td>
+			</tr>
+			<tr>
+				<td align="center" > <canvas id="canvas41"></canvas> </td>
+				<td align="center" > <canvas id="canvas42"></canvas> </td>
+				<td align="center" > <canvas id="canvas43"></canvas> </td>
+				<td align="center" > <canvas id="canvas44"></canvas> </td>
+			</tr>
+		</table>
+	</div>
+</div>
+
+<script type="text/javascript">
+    /* 拉起播放器插件 */
+    window.onload = () => {
+        playerFactory.preStart().then(() => {
+            console.log('cc 控件已安装，播放器成功启动');
+        }, (err) => {
+            console.error(err);
+        });
+    };
+    /* 应用起来后传递一下通用配置 */
+    function commonCfg(){
+        let params = {};
+        params.strProtocol = document.getElementById("txtProtocol").value;/* 协议 */
+        params.strPlatIp = document.getElementById("txtPlatIp").value;/* 平台IP */
+        params.strPlatPort = document.getElementById("txtPlatPort").value;/* 平台端口 */
+        params.strToken = document.getElementById("txtPlatToken").value;/* token */
+        params.iMultiRouteId = 0;/* 多线路Id */
+        params.strPlatLanguage = "zh_CN";/* 平台语言 */
+
+        /* 水印配置 */
+        params.strUserName = "admin";/* 用户名 */
+        params.bShowName = true;/* 是否显示用户名 */
+        params.bShowIP = true;/* 是否显示IP */
+        params.bShowMac = true;/* 是否显示Mac */
+        /* 是否开启硬解 gpu解码 */
+        params.bGpuEnable = false;
+        playerFactory.commonConfig(params).then(() => {
+            console.log('配置cc成功');
+        }, (err) => {
+            console.log(err);
+        });
+    }
+    /* 创建播放器 */
+    async function createPlayer(elementId, type = 0) {
+        let playerName = elementId + 'Player';
+        if (window[playerName]) {
+            console.log("播放器已创建");
+            return;
+        }
+        try {
+            let params = {};
+            params.notifyMethod = playerName + ".playResultNotify"; //只要是全局环境中可访问的路径，客户端就能调用
+            let player = await playerFactory.getPlayer(elementId, params, type);
+
+            //为player添加一个函数，客户端可以通过请求该函数来回复异步结果
+
+            player.playResultNotify = (result) => {
+                console.log("player:#" + player.elementId + " play result:" + JSON.stringify(result));
+            }
+
+            //将player对象保存在全局
+            window[playerName] = player;
+            return player;
+        } catch (err) {
+            console.error(err);
+        }
+    }
+    /* 销毁播放器 */
+    function destroyPlayer(eid) {
+        let playerName = eid + 'Player';
+        if (window[playerName]) {
+            playerFactory.destroy(window[playerName]);
+            window[playerName] = undefined;
+        } else {
+            console.log("播放器还未创建!");
+        }
+    }
+    /* 开始url预览 */
+    async function startPlayReal(eid) {
+        let playerName = eid + 'Player';
+        if (!window[playerName]) {
+            await createPlayer(eid, 1);
+        }
+
+        let params = {};
+        params.strIndexcode = document.getElementById("txtIndexcode").value;/* 监控点编号 */
+        params.transmode = 1;/* 取流方式 0 UDP 1 TCP  */
+        params.streamType = 1;/* 0主码流 1子码流*/
+        params.isSmallEagleEyeAbility = 0;/* 是否是小鹰眼设备 默认0不是 1是*/
+        params.url = document.getElementById("txtUrl").value;/* 预览取流url */
+        params.streamDispatchMode = 0;/* 转流方式由vnsc返回 */
+
+        let res = await window[playerName].startPlayReal(params);
+        console.log("startPlayReal reslut:" + JSON.stringify(res));
+        return res;
+    }
+
+    /* 停止预览 */
+    async function stopPlayReal(eid) {
+        let playerName = eid + 'Player';
+        if (window[playerName]) {
+            let res = await window[playerName].stopPlayReal({});
+            console.log(res);
+        } else {
+            console.log("请先创建播放器:#" + eid);
+        }
+    }
+    /* 开始回放 */
+    async function startPlayBack(eid) {
+        let playerName = eid + 'Player';
+        if (!window[playerName]) {
+            await createPlayer(eid, 1);
+        }
+
+        let params = {};
+        let queryParams = {};/* 回放请求体参数 */
+        queryParams.indexCode = document.getElementById("txtIndexcodeBack").value;/* 监控点编号 */
+        queryParams.recordStyle = 1;/* 传0是查询中心存储  传1是查询设备存储 */
+        queryParams.recordType = "0|1|2|6";/* 录像类型 0定时录像 1移动侦测 2报警触发 6手动录像 */
+        queryParams.transmode = 1;/*0 UDP 1 TCP*/
+        queryParams.streamType = 0;/* 0主码流 1子码流 */
+        /* ISO带时区格式时间 2019-11-15T00:00:00.000+08:00*/
+        queryParams.startTime = document.getElementById("txtStartTime").value;
+        queryParams.endTime = document.getElementById("txtEndTime").value;
+        params.strRecordParam = queryParams;
+        /*非必填 回放查询回复体参数 */
+        params.strRecordResponse = document.getElementById("txtRes").value;
+        let res = await window[playerName].startPlayBack(params);
+        console.log("startPlayBack reslut:" + JSON.stringify(res));
+        return res;
+    }
+    /* 停止回放 */
+    async function stopPlayBack(eid) {
+        let playerName = eid + 'Player';
+        if (window[playerName]) {
+            let res = await window[playerName].stopPlayBack({});
+            console.log(res);
+        } else {
+            console.log("请先创建播放器:#" + eid);
+        }
+    }
+    /* 截图 */
+    async function snapShot(eid){
+        let playerName = eid + 'Player';
+        if (window[playerName]){
+            let params = {};
+            params.strCameraName = "cameraName";/* 换成需要保存的截图名称 */
+            let res = await window[playerName].snapShot(params);
+            console.log("snapShot reslut:" + JSON.stringify(res));
+            return res;
+        }
+    }
+    /* 声音 */
+    function sound(eid, bOpen){
+        let playerName = eid + 'Player';
+        if (window[playerName]){
+            let params = {};
+            params.bOpen = bOpen;//true打开声音  false关闭声音
+            let res = window[playerName].sound(params);
+            console.log("sound reslut:" + JSON.stringify(res));
+            return res;
+        }
+    }
+    /* 电子放大 */
+    function digitalZoom(eid, bStart){
+        let playerName = eid + 'Player';
+        if (window[playerName]){
+            let params = {};
+            params.bStart = bStart;//true开始电子放大  false结束电子放大
+            let res = window[playerName].digitalZoom(params);
+            console.log("digitalZoom reslut:" + JSON.stringify(res));
+            return res;
+        }
+    }
+    /* 错误信息展示 */
+    function showErrorInfo(eid){
+        let playerName = eid + 'Player';
+        if (window[playerName]){
+            let params = {};
+            params.strErrInfo = "调用服务失败";//错误信息
+            params.strErrCode = "错误码: 0X11900001";//错误码
+            params.strTraceCode = "调用链: skjfdl23lkjik3j4lklbn3kln4ljlk34l";//调用链
+            let res = window[playerName].showErrorInfo(params);
+            console.log("showErrorInfo reslut:" + JSON.stringify(res));
+            return res;
+        }
+    }
+    /* 清除出错信息,重置窗口状态 */
+    function doClear(eid){
+        let playerName = eid + 'Player';
+        if (window[playerName]){
+            let res = window[playerName].clear({});
+            console.log("clear reslut:" + JSON.stringify(res));
+            return res;
+        }
+    }
+    /* 云台控制 */
+    function PTZControl(eid, bcontrol){
+        let playerName = eid + 'Player';
+        if (window[playerName]){
+            let params = {};
+            params.bControl = bcontrol;//true打开云台  false关闭云台
+            params.nCascade = 0;/* 0本级  1级联 */
+            params.strUserPriority = 10;
+            params.strUserId = "admin";//用户编号和用户名不一样
+            let res = window[playerName].PTZControl(params);
+            console.log("PTZControl reslut:" + JSON.stringify(res));
+            return res;
+        }
+    }
+    /* 暂停/恢复回放 */
+    function pause(eid, bPause){
+        let playerName = eid + 'Player';
+        if (window[playerName]){
+            let params = {};
+            params.bPause = bPause;//true暂停回放  false恢复播放
+            let res = window[playerName].pause(params);
+            console.log("pause reslut:" + JSON.stringify(res));
+            return res;
+        }
+    }
+    /* 单帧进 */
+    function frameNext(eid){
+        let playerName = eid + 'Player';
+        if (window[playerName]){
+            let res = window[playerName].frameNext({});
+            console.log("frameNext reslut:" + JSON.stringify(res));
+            return res;
+        }
+    }
+    /* 单帧退 */
+    function framePre(eid){
+        let playerName = eid + 'Player';
+        if (window[playerName]){
+            let res = window[playerName].framePre({});
+            console.log("framePre reslut:" + JSON.stringify(res));
+            return res;
+        }
+    }
+    /* 选择需要下载的录像片段 */
+    function timeSelect(eid, bSelect){
+        let playerName = eid + 'Player';
+        if (window[playerName]){
+            let params = {};
+            params.bSelect = bSelect;//true进入框选状态  false退出框选状态
+            let res = window[playerName].timeSelect(params);
+            console.log("timeSelect reslut:" + JSON.stringify(res));
+            return res;
+        }
+    }
+    /* 下载选中的录像片段 */
+    function downloadSelect(eid){
+        let playerName = eid + 'Player';
+        if (window[playerName]){
+            let params = {};
+            //params.strCamName = document.getElementById("txtCameraName").value;//监控点名称
+            params.strCamName = "txtCameraName";
+            let res = window[playerName].downloadSelect(params);
+            console.log("downloadSelect reslut:" + JSON.stringify(res));
+            return res;
+        }
+    }
+    /* 拉起极简播放器 */
+    function pullCC() {
+        ccWrapper.ccPull();
+    }
+    function initLayout(){
+        createPlayer('canvasLayout11', 1);
+        createPlayer('canvasLayout12', 1);
+        createPlayer('canvasLayout13', 1);
+        createPlayer('canvasLayout21', 1);
+    }
+    function switchLayout9(){
+        createPlayer('canvasLayout11', 1);
+        createPlayer('canvasLayout12', 1);
+        createPlayer('canvasLayout13', 1);
+        createPlayer('canvasLayout21', 1);
+        createPlayer('canvasLayout22', 1);
+        createPlayer('canvasLayout23', 1);
+        createPlayer('canvasLayout31', 1);
+        createPlayer('canvasLayout32', 1);
+        createPlayer('canvasLayout33', 1);
+    }
+    function createAllTab2Player()
+    {
+        createPlayer('canvas11', 1);
+        createPlayer('canvas12', 1);
+        createPlayer('canvas13', 1);
+        createPlayer('canvas14', 1);
+        createPlayer('canvas21', 1);
+        createPlayer('canvas22', 1);
+        createPlayer('canvas23', 1);
+        createPlayer('canvas24', 1);
+        createPlayer('canvas31', 1);
+        createPlayer('canvas32', 1);
+        createPlayer('canvas33', 1);
+        createPlayer('canvas34', 1);
+        createPlayer('canvas41', 1);
+        createPlayer('canvas42', 1);
+        createPlayer('canvas43', 1);
+        createPlayer('canvas44', 1);
+    }
+    function destroyAllTab2Player()
+    {
+        destroyPlayer('canvas11');
+        destroyPlayer('canvas12');
+        destroyPlayer('canvas13');
+        destroyPlayer('canvas14');
+        destroyPlayer('canvas21');
+        destroyPlayer('canvas22');
+        destroyPlayer('canvas23');
+        destroyPlayer('canvas24');
+        destroyPlayer('canvas31');
+        destroyPlayer('canvas32');
+        destroyPlayer('canvas33');
+        destroyPlayer('canvas34');
+        destroyPlayer('canvas41');
+        destroyPlayer('canvas42');
+        destroyPlayer('canvas43');
+        destroyPlayer('canvas44');
+    }
+</script>
+
+<script type="text/javascript">
+    //tab切换
+    $(function() {
+        $("#tabs").tabs();
+    });
+    //拖动框
+    $(function() {
+        $("#draggableA").draggable();
+    });
+    $(function() {
+        $("#draggableB").draggable();
+    });
+</script>
+</body>
+</html>
